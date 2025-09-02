@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: colegio_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: colegio
+      MYSQL_USER: melo07
+      MYSQL_PASSWORD: 123456
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - colegio_network
+
+  php:
+    build: ./php
+    image: php:7.4-apache
+    container_name: colegio_php
+    restart: always
+    ports:
+      - "8081:80"
+    volumes:
+      - ./php:/var/www/html
+    depends_on:
+      - mysql
+    networks:
+      - colegio_network
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: colegio
+      DB_USERNAME: melo07
+      DB_PASSWORD: 123456
+
+networks:
+  colegio_network:
+    driver: bridge
+
+volumes:
+  mysql_data:
